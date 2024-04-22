@@ -18,6 +18,8 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.YC_SECRET_ACCESS_KEY,
 });
 
+
+
 /**
  * Save first visit information
  *
