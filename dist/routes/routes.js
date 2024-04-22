@@ -41,7 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 var fs = require('fs');
 var path_1 = __importDefault(require("path"));
-var filePath = path_1["default"].join("/tmp", "data.json");
+var filePath = path_1["default"].join("".concat(__dirname, "/../../tmp"), "data.json");
 /**
  * Save first visit information
  *
@@ -51,6 +51,7 @@ var filePath = path_1["default"].join("/tmp", "data.json");
 var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var firstVisitData, jsonData, updatedData;
     return __generator(this, function (_a) {
+        console.log('filePath', filePath);
         //console.log('req.body', req.body);
         try {
             firstVisitData = {

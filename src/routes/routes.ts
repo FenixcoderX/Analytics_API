@@ -4,7 +4,7 @@ import path from 'path';
 
 
 
-const filePath = path.join("/tmp", "data.json");
+const filePath = path.join(`${__dirname}/../../tmp`, "data.json");
 
 type FirstVisitData = {
   country: string;
@@ -20,6 +20,7 @@ type FirstVisitData = {
  * @param {Response} res - The response with empty object
  */
 const sFirstVisit = async (req: Request, res: Response) => {
+  console.log ('filePath', filePath);
   //console.log('req.body', req.body);
   try {
     // Create a new object to store the first visit information
