@@ -1,5 +1,5 @@
 .DS_Store
-/dist
+# /dist
 /for_me
 /node_modules
 *.log
