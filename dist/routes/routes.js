@@ -35,8 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
 var fs = require('fs');
+var path_1 = __importDefault(require("path"));
+var filePath = path_1["default"].join("/tmp", "data.json");
 /**
  * Save first visit information
  *
@@ -54,7 +59,7 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 firstVisit: req.body.firstVisit,
                 id: req.body.id
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData = JSON.parse(fs.readFileSync(filePath));
             //console.log('jsonData', jsonData);
             // Check if this id with data already exists, if not add it
             if (jsonData.hasOwnProperty(firstVisitData.id)) {
@@ -67,7 +72,7 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
+            fs.writeFileSync(filePath, updatedData);
             res.json();
         }
         catch (err) {

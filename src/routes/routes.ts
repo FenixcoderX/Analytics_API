@@ -1,5 +1,10 @@
 import express, { Request, Response } from 'express';
 const fs = require('fs');
+import path from 'path';
+
+
+
+const filePath = path.join("/tmp", "data.json");
 
 type FirstVisitData = {
   country: string;
@@ -26,7 +31,7 @@ const sFirstVisit = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(filePath));
     //console.log('jsonData', jsonData);
 
     // Check if this id with data already exists, if not add it
@@ -42,7 +47,7 @@ const sFirstVisit = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
+    fs.writeFileSync(filePath, updatedData);
 
     res.json();
   } catch (err) {
