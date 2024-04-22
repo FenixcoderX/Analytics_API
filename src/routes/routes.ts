@@ -26,7 +26,7 @@ const sFirstVisit = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
     //console.log('jsonData', jsonData);
 
     // Check if this id with data already exists, if not add it
@@ -42,7 +42,7 @@ const sFirstVisit = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -72,7 +72,7 @@ const sNextVisit = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
     //console.log('jsonData', jsonData);
 
     // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
@@ -93,7 +93,7 @@ const sNextVisit = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -125,7 +125,7 @@ const sLinkClick = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
     //console.log('jsonData', jsonData);
 
     // Check if this user id already exists to add the click information to it
@@ -156,7 +156,7 @@ const sLinkClick = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -174,7 +174,7 @@ const sLinkClick = async (req: Request, res: Response) => {
 const allInfo = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
     res.json(jsonData);
   } catch (err) {
     res.status(400);
@@ -192,7 +192,7 @@ const linkClickAll = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
 
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
 
     // Create array of objects with link and amount of clicks
     let linkClicks = Object.keys(jsonData.links).map((link) => {
@@ -218,7 +218,7 @@ const linkClickAll = async (_req: Request, res: Response) => {
 const linkClickAllUniqueID = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
 
     // Create array of objects with link and amount of clicks by unique users
     let linkClicks = Object.keys(jsonData.links).map((link) => {

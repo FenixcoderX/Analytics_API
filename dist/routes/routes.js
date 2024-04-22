@@ -54,7 +54,7 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 firstVisit: req.body.firstVisit,
                 id: req.body.id
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             //console.log('jsonData', jsonData);
             // Check if this id with data already exists, if not add it
             if (jsonData.hasOwnProperty(firstVisitData.id)) {
@@ -67,7 +67,7 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
+            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
             res.json();
         }
         catch (err) {
@@ -92,7 +92,7 @@ var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 nextVisit: req.body.nextVisit,
                 id: req.body.id
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             //console.log('jsonData', jsonData);
             // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
             if (jsonData.hasOwnProperty(nextVisitData.id)) {
@@ -111,7 +111,7 @@ var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, 
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
+            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
             res.json();
         }
         catch (err) {
@@ -137,7 +137,7 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 id: req.body.id,
                 date: req.body.date
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             //console.log('jsonData', jsonData);
             // Check if this user id already exists to add the click information to it
             if (jsonData.hasOwnProperty(clickData.id)) {
@@ -164,7 +164,7 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
+            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
             res.json();
         }
         catch (err) {
@@ -184,7 +184,7 @@ var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, fu
     var jsonData;
     return __generator(this, function (_a) {
         try {
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             res.json(jsonData);
         }
         catch (err) {
@@ -204,7 +204,7 @@ var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 
     var jsonData_1, linkClicks;
     return __generator(this, function (_a) {
         try {
-            jsonData_1 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData_1 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             linkClicks = Object.keys(jsonData_1.links).map(function (link) {
                 return {
                     link: link,
@@ -230,7 +230,7 @@ var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 
     var jsonData_2, linkClicks;
     return __generator(this, function (_a) {
         try {
-            jsonData_2 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
+            jsonData_2 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
             linkClicks = Object.keys(jsonData_2.links).map(function (link) {
                 // Use a Set to store unique user IDs. uniqueUsers - object with the key representing the user ID
                 var uniqueUsers = new Set(jsonData_2.links[link].map(function (click) { return click.id; }));
