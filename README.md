@@ -1,6 +1,6 @@
 # Analytics API
 
-TypeScript | Node.js | Express | CORS
+TypeScript | Node.js | Express | CORS | Yandex Cloud Object Storage
 
 A RESTful API has been developed to collect some analytics data.
 

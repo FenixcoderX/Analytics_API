@@ -210,11 +210,22 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 if (!jsonData.hasOwnProperty('links')) {
                     jsonData.links = {};
                 }
-                if (jsonData.links[clickData.link]) {
-                    jsonData.links[clickData.link].push({ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit });
+                // Check if the user id exists in the data.json file, if yes add the link click information to the links object with full information else add the link click information with undefined country and first visit
+                if (jsonData[clickData.id]) {
+                    if (jsonData.links[clickData.link]) {
+                        jsonData.links[clickData.link].push({ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit });
+                    }
+                    else {
+                        jsonData.links[clickData.link] = [{ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit }];
+                    }
                 }
                 else {
-                    jsonData.links[clickData.link] = [{ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit }];
+                    if (jsonData.links[clickData.link]) {
+                        jsonData.links[clickData.link].push({ id: clickData.id, date: clickData.date, country: undefined, firstVisit: undefined });
+                    }
+                    else {
+                        jsonData.links[clickData.link] = [{ id: clickData.id, date: clickData.date, country: undefined, firstVisit: undefined }];
+                    }
                 }
                 updatedData = JSON.stringify(jsonData, null, 2);
                 putParams = __assign(__assign({}, params), { Body: updatedData });
