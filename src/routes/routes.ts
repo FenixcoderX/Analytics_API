@@ -1,10 +1,9 @@
 import express, { Request, Response } from 'express';
 const fs = require('fs');
-import path from 'path';
 
-
-
-const filePath = path.join(`${__dirname}/../../tmp`, "data.json");
+import dotenv from 'dotenv';
+import AWS from 'aws-sdk';
+dotenv.config();
 
 type FirstVisitData = {
   country: string;
@@ -13,6 +12,12 @@ type FirstVisitData = {
   id: string;
 };
 
+const s3 = new AWS.S3({
+  endpoint: 'https://storage.yandexcloud.net',
+  accessKeyId: process.env.YC_ACCESS_KEY_ID,
+  secretAccessKey: process.env.YC_SECRET_ACCESS_KEY,
+});
+
 /**
  * Save first visit information
  *
@@ -20,7 +25,6 @@ type FirstVisitData = {
  * @param {Response} res - The response with empty object
  */
 const sFirstVisit = async (req: Request, res: Response) => {
-  console.log ('filePath', filePath);
   //console.log('req.body', req.body);
   try {
     // Create a new object to store the first visit information
@@ -31,10 +35,24 @@ const sFirstVisit = async (req: Request, res: Response) => {
       id: req.body.id,
     };
 
-    // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(filePath));
-    //console.log('jsonData', jsonData);
+    const params = {
+      Bucket: 'analyticapi',
+      Key: 'data.json',
+    };
 
+    let jsonData: any;
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // //console.log('jsonData', jsonData);
+
+    try {
+      const data = await s3.getObject(params).promise();
+      //@ts-ignore
+      jsonData = JSON.parse(data.Body.toString());
+    } catch (err) {
+      jsonData = {};
+    }
+    
     // Check if this id with data already exists, if not add it
     if (jsonData.hasOwnProperty(firstVisitData.id)) {
       //console.log('Already exists');
@@ -47,8 +65,13 @@ const sFirstVisit = async (req: Request, res: Response) => {
     let updatedData = JSON.stringify(jsonData, null, 2);
     //console.log('updatedData', updatedData);
 
-    // Write the updated data back to the file
-    fs.writeFileSync(filePath, updatedData);
+    const putParams = {
+      ...params,
+      Body: updatedData,
+    };
+    await s3.putObject(putParams).promise();
+    // // Write the updated data back to the file
+    // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -78,7 +101,7 @@ const sNextVisit = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
     //console.log('jsonData', jsonData);
 
     // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
@@ -99,7 +122,7 @@ const sNextVisit = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
+    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -131,7 +154,7 @@ const sLinkClick = async (req: Request, res: Response) => {
     };
 
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
     //console.log('jsonData', jsonData);
 
     // Check if this user id already exists to add the click information to it
@@ -162,7 +185,7 @@ const sLinkClick = async (req: Request, res: Response) => {
     //console.log('updatedData', updatedData);
 
     // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../tmp/data.json`, updatedData);
+    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
 
     res.json();
   } catch (err) {
@@ -180,7 +203,7 @@ const sLinkClick = async (req: Request, res: Response) => {
 const allInfo = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
     res.json(jsonData);
   } catch (err) {
     res.status(400);
@@ -198,7 +221,7 @@ const linkClickAll = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
 
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
 
     // Create array of objects with link and amount of clicks
     let linkClicks = Object.keys(jsonData.links).map((link) => {
@@ -224,7 +247,7 @@ const linkClickAll = async (_req: Request, res: Response) => {
 const linkClickAllUniqueID = async (_req: Request, res: Response) => {
   try {
     // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../tmp/data.json`));
+    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
 
     // Create array of objects with link and amount of clicks by unique users
     let linkClicks = Object.keys(jsonData.links).map((link) => {

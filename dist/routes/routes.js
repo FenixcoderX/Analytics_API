@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,8 +51,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var fs = require('fs');
-var path_1 = __importDefault(require("path"));
-var filePath = path_1["default"].join("".concat(__dirname, "/../../tmp"), "data.json");
+var dotenv_1 = __importDefault(require("dotenv"));
+var aws_sdk_1 = __importDefault(require("aws-sdk"));
+dotenv_1["default"].config();
+var s3 = new aws_sdk_1["default"].S3({
+    endpoint: 'https://storage.yandexcloud.net',
+    accessKeyId: process.env.YC_ACCESS_KEY_ID,
+    secretAccessKey: process.env.YC_SECRET_ACCESS_KEY
+});
 /**
  * Save first visit information
  *
@@ -49,38 +66,60 @@ var filePath = path_1["default"].join("".concat(__dirname, "/../../tmp"), "data.
  * @param {Response} res - The response with empty object
  */
 var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var firstVisitData, jsonData, updatedData;
+    var firstVisitData, params, jsonData, data, err_1, updatedData, putParams, err_2;
     return __generator(this, function (_a) {
-        console.log('filePath', filePath);
-        //console.log('req.body', req.body);
-        try {
-            firstVisitData = {
-                country: req.body.country,
-                ip: req.body.ip,
-                firstVisit: req.body.firstVisit,
-                id: req.body.id
-            };
-            jsonData = JSON.parse(fs.readFileSync(filePath));
-            //console.log('jsonData', jsonData);
-            // Check if this id with data already exists, if not add it
-            if (jsonData.hasOwnProperty(firstVisitData.id)) {
-                //console.log('Already exists');
-            }
-            else {
-                jsonData[firstVisitData.id] = firstVisitData;
-                //console.log('Not exists');
-            }
-            updatedData = JSON.stringify(jsonData, null, 2);
-            //console.log('updatedData', updatedData);
-            // Write the updated data back to the file
-            fs.writeFileSync(filePath, updatedData);
-            res.json();
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 6, , 7]);
+                firstVisitData = {
+                    country: req.body.country,
+                    ip: req.body.ip,
+                    firstVisit: req.body.firstVisit,
+                    id: req.body.id
+                };
+                params = {
+                    Bucket: 'analyticapi',
+                    Key: 'data.json'
+                };
+                jsonData = void 0;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 2:
+                data = _a.sent();
+                //@ts-ignore
+                jsonData = JSON.parse(data.Body.toString());
+                return [3 /*break*/, 4];
+            case 3:
+                err_1 = _a.sent();
+                jsonData = {};
+                return [3 /*break*/, 4];
+            case 4:
+                // Check if this id with data already exists, if not add it
+                if (jsonData.hasOwnProperty(firstVisitData.id)) {
+                    //console.log('Already exists');
+                }
+                else {
+                    jsonData[firstVisitData.id] = firstVisitData;
+                    //console.log('Not exists');
+                }
+                updatedData = JSON.stringify(jsonData, null, 2);
+                putParams = __assign(__assign({}, params), { Body: updatedData });
+                return [4 /*yield*/, s3.putObject(putParams).promise()];
+            case 5:
+                _a.sent();
+                // // Write the updated data back to the file
+                // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+                res.json();
+                return [3 /*break*/, 7];
+            case 6:
+                err_2 = _a.sent();
+                res.status(400);
+                res.json(err_2.message);
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 /**
@@ -98,7 +137,7 @@ var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 nextVisit: req.body.nextVisit,
                 id: req.body.id
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
             //console.log('jsonData', jsonData);
             // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
             if (jsonData.hasOwnProperty(nextVisitData.id)) {
@@ -117,7 +156,7 @@ var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, 
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
+            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
             res.json();
         }
         catch (err) {
@@ -143,7 +182,7 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 id: req.body.id,
                 date: req.body.date
             };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
             //console.log('jsonData', jsonData);
             // Check if this user id already exists to add the click information to it
             if (jsonData.hasOwnProperty(clickData.id)) {
@@ -170,7 +209,7 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
             updatedData = JSON.stringify(jsonData, null, 2);
             //console.log('updatedData', updatedData);
             // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../tmp/data.json"), updatedData);
+            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
             res.json();
         }
         catch (err) {
@@ -190,7 +229,7 @@ var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, fu
     var jsonData;
     return __generator(this, function (_a) {
         try {
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
             res.json(jsonData);
         }
         catch (err) {
@@ -210,7 +249,7 @@ var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 
     var jsonData_1, linkClicks;
     return __generator(this, function (_a) {
         try {
-            jsonData_1 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData_1 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
             linkClicks = Object.keys(jsonData_1.links).map(function (link) {
                 return {
                     link: link,
@@ -236,7 +275,7 @@ var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 
     var jsonData_2, linkClicks;
     return __generator(this, function (_a) {
         try {
-            jsonData_2 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../tmp/data.json")));
+            jsonData_2 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
             linkClicks = Object.keys(jsonData_2.links).map(function (link) {
                 // Use a Set to store unique user IDs. uniqueUsers - object with the key representing the user ID
                 var uniqueUsers = new Set(jsonData_2.links[link].map(function (click) { return click.id; }));
