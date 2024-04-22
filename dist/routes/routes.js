@@ -52,13 +52,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 var fs = require('fs');
 var dotenv_1 = __importDefault(require("dotenv"));
-var aws_sdk_1 = __importDefault(require("aws-sdk"));
+var aws_sdk_1 = __importDefault(require("aws-sdk")); // Import the AWS SDK
 dotenv_1["default"].config();
+// Create a new S3 object to interact with the Yandex Object Storage
 var s3 = new aws_sdk_1["default"].S3({
     endpoint: 'https://storage.yandexcloud.net',
     accessKeyId: process.env.YC_ACCESS_KEY_ID,
     secretAccessKey: process.env.YC_SECRET_ACCESS_KEY
 });
+// Create a new object with the parameters to interact with the Yandex Object Storage
+var params = {
+    Bucket: 'analyticapi',
+    Key: 'data.json'
+};
 /**
  * Save first visit information
  *
@@ -66,36 +72,23 @@ var s3 = new aws_sdk_1["default"].S3({
  * @param {Response} res - The response with empty object
  */
 var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var firstVisitData, params, jsonData, data, err_1, updatedData, putParams, err_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var firstVisitData, data, jsonData, updatedData, putParams, err_1;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                _a.trys.push([0, 6, , 7]);
+                _b.trys.push([0, 3, , 4]);
                 firstVisitData = {
                     country: req.body.country,
                     ip: req.body.ip,
                     firstVisit: req.body.firstVisit,
                     id: req.body.id
                 };
-                params = {
-                    Bucket: 'analyticapi',
-                    Key: 'data.json'
-                };
-                jsonData = void 0;
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, s3.getObject(params).promise()];
-            case 2:
-                data = _a.sent();
-                //@ts-ignore
-                jsonData = JSON.parse(data.Body.toString());
-                return [3 /*break*/, 4];
-            case 3:
-                err_1 = _a.sent();
-                jsonData = {};
-                return [3 /*break*/, 4];
-            case 4:
+            case 1:
+                data = _b.sent();
+                jsonData = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                // ------------
                 // Check if this id with data already exists, if not add it
                 if (jsonData.hasOwnProperty(firstVisitData.id)) {
                     //console.log('Already exists');
@@ -106,19 +99,20 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
                 }
                 updatedData = JSON.stringify(jsonData, null, 2);
                 putParams = __assign(__assign({}, params), { Body: updatedData });
+                // Write the updated data back to the Yandex Object Storage
                 return [4 /*yield*/, s3.putObject(putParams).promise()];
-            case 5:
-                _a.sent();
-                // // Write the updated data back to the file
-                // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+            case 2:
+                // Write the updated data back to the Yandex Object Storage
+                _b.sent();
+                // ------------
                 res.json();
-                return [3 /*break*/, 7];
-            case 6:
-                err_2 = _a.sent();
+                return [3 /*break*/, 4];
+            case 3:
+                err_1 = _b.sent();
                 res.status(400);
-                res.json(err_2.message);
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                res.json(err_1.message);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
@@ -129,41 +123,52 @@ var sFirstVisit = function (req, res) { return __awaiter(void 0, void 0, void 0,
  * @param {Response} res - The response with empty object
  */
 var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var nextVisitData, jsonData, updatedData;
-    return __generator(this, function (_a) {
-        //console.log('req.body', req.body);
-        try {
-            nextVisitData = {
-                nextVisit: req.body.nextVisit,
-                id: req.body.id
-            };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
-            //console.log('jsonData', jsonData);
-            // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
-            if (jsonData.hasOwnProperty(nextVisitData.id)) {
-                //console.log('User exists, add next visit date');
-                // Check if the next visit date already exists and add it in array with visit date or create a new array with the visit date
-                if (jsonData[nextVisitData.id].nextVisit) {
-                    jsonData[nextVisitData.id].nextVisit.push(nextVisitData.nextVisit);
+    var nextVisitData, data, jsonData, updatedData, putParams, err_2;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 3, , 4]);
+                nextVisitData = {
+                    nextVisit: req.body.nextVisit,
+                    id: req.body.id
+                };
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 1:
+                data = _b.sent();
+                jsonData = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                // ------------
+                // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
+                if (jsonData.hasOwnProperty(nextVisitData.id)) {
+                    //console.log('User exists, add next visit date');
+                    // Check if the next visit date already exists and add it in array with visit date or create a new array with the visit date
+                    if (jsonData[nextVisitData.id].nextVisit) {
+                        jsonData[nextVisitData.id].nextVisit.push(nextVisitData.nextVisit);
+                    }
+                    else {
+                        jsonData[nextVisitData.id].nextVisit = [nextVisitData.nextVisit];
+                    }
                 }
                 else {
-                    jsonData[nextVisitData.id].nextVisit = [nextVisitData.nextVisit];
+                    jsonData[nextVisitData.id] = { id: nextVisitData.id, nextVisit: [nextVisitData.nextVisit] };
                 }
-            }
-            else {
-                jsonData[nextVisitData.id] = { id: nextVisitData.id, nextVisit: [nextVisitData.nextVisit] };
-            }
-            updatedData = JSON.stringify(jsonData, null, 2);
-            //console.log('updatedData', updatedData);
-            // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
-            res.json();
+                updatedData = JSON.stringify(jsonData, null, 2);
+                putParams = __assign(__assign({}, params), { Body: updatedData });
+                // Write the updated data back to the Yandex Object Storage
+                return [4 /*yield*/, s3.putObject(putParams).promise()];
+            case 2:
+                // Write the updated data back to the Yandex Object Storage
+                _b.sent();
+                // ------------
+                res.json();
+                return [3 /*break*/, 4];
+            case 3:
+                err_2 = _b.sent();
+                res.status(400);
+                res.json(err_2.message);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 /**
@@ -173,50 +178,61 @@ var sNextVisit = function (req, res) { return __awaiter(void 0, void 0, void 0, 
  * @param {Response} res - The response with empty object
  */
 var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var clickData, jsonData, updatedData;
-    return __generator(this, function (_a) {
-        console.log('req.body', req.body);
-        try {
-            clickData = {
-                link: req.body.link,
-                id: req.body.id,
-                date: req.body.date
-            };
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
-            //console.log('jsonData', jsonData);
-            // Check if this user id already exists to add the click information to it
-            if (jsonData.hasOwnProperty(clickData.id)) {
-                console.log('User exists, add click information');
-                // Check if the click information already exists and add it in array with click objects or create a new array with the click object
-                if (jsonData[clickData.id].click) {
-                    jsonData[clickData.id].click.push({ link: clickData.link, date: clickData.date });
+    var clickData, data, jsonData, updatedData, putParams, err_3;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 3, , 4]);
+                clickData = {
+                    link: req.body.link,
+                    id: req.body.id,
+                    date: req.body.date
+                };
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 1:
+                data = _b.sent();
+                jsonData = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                // ------------
+                // Check if this user id already exists to add the click information to it
+                if (jsonData.hasOwnProperty(clickData.id)) {
+                    //console.log('User exists, add click information');
+                    // Check if the click information already exists and add it in array with click objects or create a new array with the click object
+                    if (jsonData[clickData.id].click) {
+                        jsonData[clickData.id].click.push({ link: clickData.link, date: clickData.date });
+                    }
+                    else {
+                        jsonData[clickData.id].click = [{ link: clickData.link, date: clickData.date }];
+                    }
+                }
+                // Save the link click information to the links object
+                // Check if the link already exists and add it in array with click objects or create a new array with the click object
+                if (!jsonData.hasOwnProperty('links')) {
+                    jsonData.links = {};
+                }
+                if (jsonData.links[clickData.link]) {
+                    jsonData.links[clickData.link].push({ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit });
                 }
                 else {
-                    jsonData[clickData.id].click = [{ link: clickData.link, date: clickData.date }];
+                    jsonData.links[clickData.link] = [{ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit }];
                 }
-            }
-            // Save the link click information to the links object
-            // Check if the link already exists and add it in array with click objects or create a new array with the click object
-            if (!jsonData.hasOwnProperty('links')) {
-                jsonData.links = {};
-            }
-            if (jsonData.links[clickData.link]) {
-                jsonData.links[clickData.link].push({ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit });
-            }
-            else {
-                jsonData.links[clickData.link] = [{ id: clickData.id, date: clickData.date, country: jsonData[clickData.id].country, firstVisit: jsonData[clickData.id].firstVisit }];
-            }
-            updatedData = JSON.stringify(jsonData, null, 2);
-            //console.log('updatedData', updatedData);
-            // Write the updated data back to the file
-            fs.writeFileSync("".concat(__dirname, "/../../assets/data.json"), updatedData);
-            res.json();
+                updatedData = JSON.stringify(jsonData, null, 2);
+                putParams = __assign(__assign({}, params), { Body: updatedData });
+                // Write the updated data back to the Yandex Object Storage
+                return [4 /*yield*/, s3.putObject(putParams).promise()];
+            case 2:
+                // Write the updated data back to the Yandex Object Storage
+                _b.sent();
+                // ------------
+                res.json();
+                return [3 /*break*/, 4];
+            case 3:
+                err_3 = _b.sent();
+                res.status(400);
+                res.json(err_3.message);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 /**
@@ -226,17 +242,26 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
  * @param {Response} res - The response object used to send all the information
  */
 var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var jsonData;
-    return __generator(this, function (_a) {
-        try {
-            jsonData = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
-            res.json(jsonData);
+    var data, jsonData, err_4;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 1:
+                data = _b.sent();
+                jsonData = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                // ------------
+                res.json(jsonData);
+                return [3 /*break*/, 3];
+            case 2:
+                err_4 = _b.sent();
+                res.status(400);
+                res.json(err_4.message);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 /**
@@ -246,23 +271,31 @@ var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, fu
  * @param {Response} res - The response object used to send the clicks information
  */
 var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var jsonData_1, linkClicks;
-    return __generator(this, function (_a) {
-        try {
-            jsonData_1 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
-            linkClicks = Object.keys(jsonData_1.links).map(function (link) {
-                return {
-                    link: link,
-                    clicks: jsonData_1.links[link].length
-                };
-            });
-            res.json(linkClicks);
+    var data, jsonData_1, linkClicks, err_5;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 1:
+                data = _b.sent();
+                jsonData_1 = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                linkClicks = Object.keys(jsonData_1.links).map(function (link) {
+                    return {
+                        link: link,
+                        clicks: jsonData_1.links[link].length
+                    };
+                });
+                res.json(linkClicks);
+                return [3 /*break*/, 3];
+            case 2:
+                err_5 = _b.sent();
+                res.status(400);
+                res.json(err_5.message);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 /**
@@ -272,25 +305,33 @@ var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 
  * @param {Response} res - The response object used to send the clicks information
  */
 var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var jsonData_2, linkClicks;
-    return __generator(this, function (_a) {
-        try {
-            jsonData_2 = JSON.parse(fs.readFileSync("".concat(__dirname, "/../../assets/data.json")));
-            linkClicks = Object.keys(jsonData_2.links).map(function (link) {
-                // Use a Set to store unique user IDs. uniqueUsers - object with the key representing the user ID
-                var uniqueUsers = new Set(jsonData_2.links[link].map(function (click) { return click.id; }));
-                return {
-                    link: link,
-                    clicks: uniqueUsers.size
-                };
-            });
-            res.json(linkClicks);
+    var data, jsonData_2, linkClicks, err_6;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, s3.getObject(params).promise()];
+            case 1:
+                data = _b.sent();
+                jsonData_2 = JSON.parse(((_a = data.Body) === null || _a === void 0 ? void 0 : _a.toString()) || '{}');
+                linkClicks = Object.keys(jsonData_2.links).map(function (link) {
+                    // Use a Set to store unique user IDs. uniqueUsers - object with the key representing the user ID
+                    var uniqueUsers = new Set(jsonData_2.links[link].map(function (click) { return click.id; }));
+                    return {
+                        link: link,
+                        clicks: uniqueUsers.size
+                    };
+                });
+                res.json(linkClicks);
+                return [3 /*break*/, 3];
+            case 2:
+                err_6 = _b.sent();
+                res.status(400);
+                res.json(err_6.message);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
-        catch (err) {
-            res.status(400);
-            res.json(err.message);
-        }
-        return [2 /*return*/];
     });
 }); };
 // Express routes here

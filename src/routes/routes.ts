@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 const fs = require('fs');
 
 import dotenv from 'dotenv';
-import AWS from 'aws-sdk';
+import AWS from 'aws-sdk'; // Import the AWS SDK
 dotenv.config();
 
 type FirstVisitData = {
@@ -12,13 +12,18 @@ type FirstVisitData = {
   id: string;
 };
 
+// Create a new S3 object to interact with the Yandex Object Storage
 const s3 = new AWS.S3({
   endpoint: 'https://storage.yandexcloud.net',
   accessKeyId: process.env.YC_ACCESS_KEY_ID,
   secretAccessKey: process.env.YC_SECRET_ACCESS_KEY,
 });
 
-
+// Create a new object with the parameters to interact with the Yandex Object Storage
+const params = {
+  Bucket: 'analyticapi',
+  Key: 'data.json',
+};
 
 /**
  * Save first visit information
@@ -37,24 +42,19 @@ const sFirstVisit = async (req: Request, res: Response) => {
       id: req.body.id,
     };
 
-    const params = {
-      Bucket: 'analyticapi',
-      Key: 'data.json',
-    };
-
-    let jsonData: any;
+    // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
-    // //console.log('jsonData', jsonData);
+    // ------------
 
-    try {
-      const data = await s3.getObject(params).promise();
-      //@ts-ignore
-      jsonData = JSON.parse(data.Body.toString());
-    } catch (err) {
-      jsonData = {};
-    }
-    
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+
+    // Parse the data from the Yandex Object Storage and check if it is empty to create an empty object
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
+
     // Check if this id with data already exists, if not add it
     if (jsonData.hasOwnProperty(firstVisitData.id)) {
       //console.log('Already exists');
@@ -67,13 +67,20 @@ const sFirstVisit = async (req: Request, res: Response) => {
     let updatedData = JSON.stringify(jsonData, null, 2);
     //console.log('updatedData', updatedData);
 
+    // ------------ Local file system ------------
+    // // Write the updated data back to the file
+    // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Create a new object with the parameters to interact with the Yandex Object Storage
     const putParams = {
       ...params,
       Body: updatedData,
     };
+    // Write the updated data back to the Yandex Object Storage
     await s3.putObject(putParams).promise();
-    // // Write the updated data back to the file
-    // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------
 
     res.json();
   } catch (err) {
@@ -102,9 +109,18 @@ const sNextVisit = async (req: Request, res: Response) => {
       id: req.body.id,
     };
 
-    // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
-    //console.log('jsonData', jsonData);
+    // ------------ Local file system ------------
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // //console.log('jsonData', jsonData);
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+    // Parse the data from the Yandex Object Storage and check if it is empty to create an empty object
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
 
     // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
     if (jsonData.hasOwnProperty(nextVisitData.id)) {
@@ -123,8 +139,20 @@ const sNextVisit = async (req: Request, res: Response) => {
     let updatedData = JSON.stringify(jsonData, null, 2);
     //console.log('updatedData', updatedData);
 
-    // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------ Local file system ------------
+    // // Write the updated data back to the file
+    // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Create a new object with the parameters to interact with the Yandex Object Storage
+    const putParams = {
+      ...params,
+      Body: updatedData,
+    };
+    // Write the updated data back to the Yandex Object Storage
+    await s3.putObject(putParams).promise();
+    // ------------
 
     res.json();
   } catch (err) {
@@ -146,7 +174,7 @@ type ClickData = {
  * @param {Response} res - The response with empty object
  */
 const sLinkClick = async (req: Request, res: Response) => {
-  console.log('req.body', req.body);
+  //console.log('req.body', req.body);
   try {
     // Create a new object to store the click information
     const clickData: ClickData = {
@@ -155,13 +183,22 @@ const sLinkClick = async (req: Request, res: Response) => {
       date: req.body.date,
     };
 
-    // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
-    //console.log('jsonData', jsonData);
+    // ------------ Local file system ------------
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // //console.log('jsonData', jsonData);
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+    // Parse the data from the Yandex Object Storage and check if it is empty to create an empty object
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
 
     // Check if this user id already exists to add the click information to it
     if (jsonData.hasOwnProperty(clickData.id)) {
-      console.log('User exists, add click information');
+      //console.log('User exists, add click information');
 
       // Check if the click information already exists and add it in array with click objects or create a new array with the click object
       if (jsonData[clickData.id].click) {
@@ -186,8 +223,20 @@ const sLinkClick = async (req: Request, res: Response) => {
     let updatedData = JSON.stringify(jsonData, null, 2);
     //console.log('updatedData', updatedData);
 
-    // Write the updated data back to the file
-    fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------ Local file system ------------
+    // // Write the updated data back to the file
+    // fs.writeFileSync(`${__dirname}/../../assets/data.json`, updatedData);
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Create a new object with the parameters to interact with the Yandex Object Storage
+    const putParams = {
+      ...params,
+      Body: updatedData,
+    };
+    // Write the updated data back to the Yandex Object Storage
+    await s3.putObject(putParams).promise();
+    // ------------
 
     res.json();
   } catch (err) {
@@ -204,8 +253,17 @@ const sLinkClick = async (req: Request, res: Response) => {
  */
 const allInfo = async (_req: Request, res: Response) => {
   try {
-    // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------ Local file system ------------
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
+
     res.json(jsonData);
   } catch (err) {
     res.status(400);
@@ -221,9 +279,16 @@ const allInfo = async (_req: Request, res: Response) => {
  */
 const linkClickAll = async (_req: Request, res: Response) => {
   try {
-    // Read the data from the data.json file and parse it
+    // ------------ Local file system ------------
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------
 
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
 
     // Create array of objects with link and amount of clicks
     let linkClicks = Object.keys(jsonData.links).map((link) => {
@@ -248,8 +313,16 @@ const linkClickAll = async (_req: Request, res: Response) => {
  */
 const linkClickAllUniqueID = async (_req: Request, res: Response) => {
   try {
-    // Read the data from the data.json file and parse it
-    let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------ Local file system ------------
+    // // Read the data from the data.json file and parse it
+    // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
+    // ------------
+
+    // ------------ Yandex Object Storage ------------
+    // Read the data from the data.json file and parse it from the Yandex Object Storage
+    const data = await s3.getObject(params).promise();
+    let jsonData = JSON.parse(data.Body?.toString() || '{}');
+    // ------------
 
     // Create array of objects with link and amount of clicks by unique users
     let linkClicks = Object.keys(jsonData.links).map((link) => {
