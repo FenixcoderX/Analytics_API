@@ -258,23 +258,29 @@ const sLinkClick = async (req: Request, res: Response) => {
 /**
  * Get all info from the data.json file
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send all the information
  */
-const allInfo = async (_req: Request, res: Response) => {
+const allInfo = async (req: Request, res: Response) => {
   try {
+    
+    // Check password for access
+    if (req.body.password===process.env.PASSWORD)  { 
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
     // ------------
-
+    // TODO if (process.env.PASSWORD===req.body.password){}
     // ------------ Yandex Object Storage ------------
     // Read the data from the data.json file and parse it from the Yandex Object Storage
     const data = await s3.getObject(params).promise();
     let jsonData = JSON.parse(data.Body?.toString() || '{}');
     // ------------
-
-    res.json(jsonData);
+    res.json(jsonData);}
+    else {
+      res.status(400);
+      res.json("wrong password");
+    }
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -284,11 +290,12 @@ const allInfo = async (_req: Request, res: Response) => {
 /**
  * Get info about the links with amount of clicks
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send the clicks information
  */
-const linkClickAll = async (_req: Request, res: Response) => {
+const linkClickAll = async (req: Request, res: Response) => {
   try {
+    if (req.body.password===process.env.PASSWORD)  { 
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
@@ -308,7 +315,11 @@ const linkClickAll = async (_req: Request, res: Response) => {
       };
     });
 
-    res.json(linkClicks);
+    res.json(linkClicks);}
+    else {
+      res.status(400);
+      res.json("wrong password");
+    }
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -318,11 +329,12 @@ const linkClickAll = async (_req: Request, res: Response) => {
 /**
  * Get info about the links with amount of clicks by unique users
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send the clicks information
  */
-const linkClickAllUniqueID = async (_req: Request, res: Response) => {
+const linkClickAllUniqueID = async (req: Request, res: Response) => {
   try {
+    if (req.body.password===process.env.PASSWORD)  { 
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
@@ -345,7 +357,11 @@ const linkClickAllUniqueID = async (_req: Request, res: Response) => {
       };
     });
 
-    res.json(linkClicks);
+    res.json(linkClicks);}
+    else {
+      res.status(400);
+      res.json("wrong password");
+    }
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -359,7 +375,7 @@ const linkClickAllUniqueID = async (_req: Request, res: Response) => {
  *
  * @param {express.Application} app - The express application object
  */
-const productRoutes = (app: express.Application) => {
+const analyticRoutes = (app: express.Application) => {
   // Route to save first visit information
   app.post('/sFirstVisit', sFirstVisit);
 
@@ -379,4 +395,4 @@ const productRoutes = (app: express.Application) => {
   app.get('/linkClickAllUniqueID', linkClickAllUniqueID);
 };
 
-export default productRoutes;
+export default analyticRoutes;

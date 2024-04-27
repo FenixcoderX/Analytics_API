@@ -249,16 +249,17 @@ var sLinkClick = function (req, res) { return __awaiter(void 0, void 0, void 0, 
 /**
  * Get all info from the data.json file
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send all the information
  */
-var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var allInfo = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var data, jsonData, err_4;
     var _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _b.trys.push([0, 4, , 5]);
+                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -267,27 +268,33 @@ var allInfo = function (_req, res) { return __awaiter(void 0, void 0, void 0, fu
                 res.json(jsonData);
                 return [3 /*break*/, 3];
             case 2:
+                res.status(400);
+                res.json("wrong password");
+                _b.label = 3;
+            case 3: return [3 /*break*/, 5];
+            case 4:
                 err_4 = _b.sent();
                 res.status(400);
                 res.json(err_4.message);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
 /**
  * Get info about the links with amount of clicks
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send the clicks information
  */
-var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var linkClickAll = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var data, jsonData_1, linkClicks, err_5;
     var _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _b.trys.push([0, 4, , 5]);
+                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -301,27 +308,33 @@ var linkClickAll = function (_req, res) { return __awaiter(void 0, void 0, void 
                 res.json(linkClicks);
                 return [3 /*break*/, 3];
             case 2:
+                res.status(400);
+                res.json("wrong password");
+                _b.label = 3;
+            case 3: return [3 /*break*/, 5];
+            case 4:
                 err_5 = _b.sent();
                 res.status(400);
                 res.json(err_5.message);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
 /**
  * Get info about the links with amount of clicks by unique users
  *
- * @param {Request} _req - The request object (unused)
+ * @param {Request} _req - The request object (password)
  * @param {Response} res - The response object used to send the clicks information
  */
-var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var linkClickAllUniqueID = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var data, jsonData_2, linkClicks, err_6;
     var _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
+                _b.trys.push([0, 4, , 5]);
+                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -337,11 +350,16 @@ var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 
                 res.json(linkClicks);
                 return [3 /*break*/, 3];
             case 2:
+                res.status(400);
+                res.json("wrong password");
+                _b.label = 3;
+            case 3: return [3 /*break*/, 5];
+            case 4:
                 err_6 = _b.sent();
                 res.status(400);
                 res.json(err_6.message);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
@@ -351,7 +369,7 @@ var linkClickAllUniqueID = function (_req, res) { return __awaiter(void 0, void 
  *
  * @param {express.Application} app - The express application object
  */
-var productRoutes = function (app) {
+var analyticRoutes = function (app) {
     // Route to save first visit information
     app.post('/sFirstVisit', sFirstVisit);
     // Route to save next visit information
@@ -365,4 +383,4 @@ var productRoutes = function (app) {
     // Route to get info about the links with amount of clicks by unique users
     app.get('/linkClickAllUniqueID', linkClickAllUniqueID);
 };
-exports["default"] = productRoutes;
+exports["default"] = analyticRoutes;

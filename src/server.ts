@@ -2,7 +2,7 @@
 
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import productRoutes from './routes/routes';
+import analyticRoutes from './routes/routes';
 import cors from 'cors';
 
 // Create a new express server
@@ -32,6 +32,6 @@ app.listen(3001, () => {
 });
 
 // Define routes for the app
-productRoutes(app);
+analyticRoutes(app);
 
 export default app;

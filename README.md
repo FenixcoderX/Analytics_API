@@ -10,7 +10,7 @@ A RESTful API has been developed to collect some analytics data.
 ### 1. **Install the dependencies**
 
 ```bash
-  yarn install
+  npm install
 ```
 ### 2. **Data**
 
@@ -19,7 +19,7 @@ In repo in assets folder, you will see a `.data.json-example` file. Rename the f
 ### 3. You can **use the following script**:
 
 ```bash
-  yarn watch
+  npm run watch
 ```
 
 - watch: to start the server
