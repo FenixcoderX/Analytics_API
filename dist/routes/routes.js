@@ -50,10 +50,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
+exports.passwordCheck = void 0;
 var fs = require('fs');
 var dotenv_1 = __importDefault(require("dotenv"));
 var aws_sdk_1 = __importDefault(require("aws-sdk")); // Import the AWS SDK
 dotenv_1["default"].config();
+var passwordCheck = function (req, res, next) {
+    if (req.body.password === process.env.PASSWORD) {
+        console.log('Access granted');
+        next(); // Call the next middleware function
+    }
+    else {
+        console.log('Access denied, wrong password');
+        res.status(401);
+        res.json('Access denied, wrong password');
+    }
+};
+exports.passwordCheck = passwordCheck;
 // Create a new S3 object to interact with the Yandex Object Storage
 var s3 = new aws_sdk_1["default"].S3({
     endpoint: 'https://storage.yandexcloud.net',
@@ -258,8 +271,7 @@ var allInfo = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 4, , 5]);
-                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
+                _b.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -268,16 +280,11 @@ var allInfo = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
                 res.json(jsonData);
                 return [3 /*break*/, 3];
             case 2:
-                res.status(400);
-                res.json("wrong password");
-                _b.label = 3;
-            case 3: return [3 /*break*/, 5];
-            case 4:
                 err_4 = _b.sent();
                 res.status(400);
                 res.json(err_4.message);
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -293,8 +300,7 @@ var linkClickAll = function (req, res) { return __awaiter(void 0, void 0, void 0
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 4, , 5]);
-                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
+                _b.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -308,16 +314,11 @@ var linkClickAll = function (req, res) { return __awaiter(void 0, void 0, void 0
                 res.json(linkClicks);
                 return [3 /*break*/, 3];
             case 2:
-                res.status(400);
-                res.json("wrong password");
-                _b.label = 3;
-            case 3: return [3 /*break*/, 5];
-            case 4:
                 err_5 = _b.sent();
                 res.status(400);
                 res.json(err_5.message);
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -333,8 +334,7 @@ var linkClickAllUniqueID = function (req, res) { return __awaiter(void 0, void 0
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 4, , 5]);
-                if (!(req.body.password === process.env.PASSWORD)) return [3 /*break*/, 2];
+                _b.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, s3.getObject(params).promise()];
             case 1:
                 data = _b.sent();
@@ -350,16 +350,11 @@ var linkClickAllUniqueID = function (req, res) { return __awaiter(void 0, void 0
                 res.json(linkClicks);
                 return [3 /*break*/, 3];
             case 2:
-                res.status(400);
-                res.json("wrong password");
-                _b.label = 3;
-            case 3: return [3 /*break*/, 5];
-            case 4:
                 err_6 = _b.sent();
                 res.status(400);
                 res.json(err_6.message);
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -371,16 +366,16 @@ var linkClickAllUniqueID = function (req, res) { return __awaiter(void 0, void 0
  */
 var analyticRoutes = function (app) {
     // Route to save first visit information
-    app.post('/sFirstVisit', sFirstVisit);
+    app.post('/sFirstVisit', exports.passwordCheck, sFirstVisit);
     // Route to save next visit information
-    app.post('/sNextVisit', sNextVisit);
+    app.post('/sNextVisit', exports.passwordCheck, sNextVisit);
     // Route to save link click information
-    app.post('/sLinkClick', sLinkClick);
+    app.post('/sLinkClick', exports.passwordCheck, sLinkClick);
     // Route to get all info from data.json
-    app.get('/allInfo', allInfo);
+    app.get('/allInfo', exports.passwordCheck, allInfo);
     // Route to get info about the links with amount of clicks
-    app.get('/linkClickAll', linkClickAll);
+    app.get('/linkClickAll', exports.passwordCheck, linkClickAll);
     // Route to get info about the links with amount of clicks by unique users
-    app.get('/linkClickAllUniqueID', linkClickAllUniqueID);
+    app.get('/linkClickAllUniqueID', exports.passwordCheck, linkClickAllUniqueID);
 };
 exports["default"] = analyticRoutes;

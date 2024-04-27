@@ -1,9 +1,20 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 const fs = require('fs');
 
 import dotenv from 'dotenv';
 import AWS from 'aws-sdk'; // Import the AWS SDK
 dotenv.config();
+
+export const passwordCheck = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body.password === process.env.PASSWORD) {
+    console.log('Access granted');
+    next(); // Call the next middleware function
+  } else {
+    console.log('Access denied, wrong password');
+    res.status(401);
+    res.json('Access denied, wrong password');
+  }
+};
 
 type FirstVisitData = {
   country: string;
@@ -263,9 +274,8 @@ const sLinkClick = async (req: Request, res: Response) => {
  */
 const allInfo = async (req: Request, res: Response) => {
   try {
-    
     // Check password for access
-    if (req.body.password===process.env.PASSWORD)  { 
+
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
@@ -276,11 +286,7 @@ const allInfo = async (req: Request, res: Response) => {
     const data = await s3.getObject(params).promise();
     let jsonData = JSON.parse(data.Body?.toString() || '{}');
     // ------------
-    res.json(jsonData);}
-    else {
-      res.status(400);
-      res.json("wrong password");
-    }
+    res.json(jsonData);
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -295,7 +301,6 @@ const allInfo = async (req: Request, res: Response) => {
  */
 const linkClickAll = async (req: Request, res: Response) => {
   try {
-    if (req.body.password===process.env.PASSWORD)  { 
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
@@ -315,11 +320,7 @@ const linkClickAll = async (req: Request, res: Response) => {
       };
     });
 
-    res.json(linkClicks);}
-    else {
-      res.status(400);
-      res.json("wrong password");
-    }
+    res.json(linkClicks);
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -334,7 +335,6 @@ const linkClickAll = async (req: Request, res: Response) => {
  */
 const linkClickAllUniqueID = async (req: Request, res: Response) => {
   try {
-    if (req.body.password===process.env.PASSWORD)  { 
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
@@ -357,11 +357,7 @@ const linkClickAllUniqueID = async (req: Request, res: Response) => {
       };
     });
 
-    res.json(linkClicks);}
-    else {
-      res.status(400);
-      res.json("wrong password");
-    }
+    res.json(linkClicks);
   } catch (err) {
     res.status(400);
     res.json((err as Error).message);
@@ -377,22 +373,22 @@ const linkClickAllUniqueID = async (req: Request, res: Response) => {
  */
 const analyticRoutes = (app: express.Application) => {
   // Route to save first visit information
-  app.post('/sFirstVisit', sFirstVisit);
+  app.post('/sFirstVisit',passwordCheck, sFirstVisit);
 
   // Route to save next visit information
-  app.post('/sNextVisit', sNextVisit);
+  app.post('/sNextVisit',passwordCheck, sNextVisit);
 
   // Route to save link click information
-  app.post('/sLinkClick', sLinkClick);
+  app.post('/sLinkClick',passwordCheck, sLinkClick);
 
   // Route to get all info from data.json
-  app.get('/allInfo', allInfo);
+  app.get('/allInfo', passwordCheck, allInfo);
 
   // Route to get info about the links with amount of clicks
-  app.get('/linkClickAll', linkClickAll);
+  app.get('/linkClickAll', passwordCheck, linkClickAll);
 
   // Route to get info about the links with amount of clicks by unique users
-  app.get('/linkClickAllUniqueID', linkClickAllUniqueID);
+  app.get('/linkClickAllUniqueID', passwordCheck, linkClickAllUniqueID);
 };
 
 export default analyticRoutes;
