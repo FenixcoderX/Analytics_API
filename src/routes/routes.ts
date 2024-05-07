@@ -43,7 +43,6 @@ const params = {
  * @param {Response} res - The response with empty object
  */
 const sFirstVisit = async (req: Request, res: Response) => {
-  //console.log('req.body', req.body);
   try {
     // Create a new object to store the first visit information
     const firstVisitData: FirstVisitData = {
@@ -68,15 +67,12 @@ const sFirstVisit = async (req: Request, res: Response) => {
 
     // Check if this id with data already exists, if not add it
     if (jsonData.hasOwnProperty(firstVisitData.id)) {
-      //console.log('Already exists');
     } else {
       jsonData[firstVisitData.id] = firstVisitData;
-      //console.log('Not exists');
     }
 
     // Stringify the updated data
     let updatedData = JSON.stringify(jsonData, null, 2);
-    //console.log('updatedData', updatedData);
 
     // ------------ Local file system ------------
     // // Write the updated data back to the file
@@ -112,7 +108,6 @@ type NextVisitData = {
  * @param {Response} res - The response with empty object
  */
 const sNextVisit = async (req: Request, res: Response) => {
-  //console.log('req.body', req.body);
   try {
     // Create a new object to store the next visit information
     const nextVisitData: NextVisitData = {
@@ -123,7 +118,6 @@ const sNextVisit = async (req: Request, res: Response) => {
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
-    // //console.log('jsonData', jsonData);
     // ------------
 
     // ------------ Yandex Object Storage ------------
@@ -135,7 +129,6 @@ const sNextVisit = async (req: Request, res: Response) => {
 
     // Check if this user id already exists to add the next visit date or create a new user id with the next visit date
     if (jsonData.hasOwnProperty(nextVisitData.id)) {
-      //console.log('User exists, add next visit date');
       // Check if the next visit date already exists and add it in array with visit date or create a new array with the visit date
       if (jsonData[nextVisitData.id].nextVisit) {
         jsonData[nextVisitData.id].nextVisit.push(nextVisitData.nextVisit);
@@ -148,7 +141,6 @@ const sNextVisit = async (req: Request, res: Response) => {
 
     // Stringify the updated data
     let updatedData = JSON.stringify(jsonData, null, 2);
-    //console.log('updatedData', updatedData);
 
     // ------------ Local file system ------------
     // // Write the updated data back to the file
@@ -185,7 +177,6 @@ type ClickData = {
  * @param {Response} res - The response with empty object
  */
 const sLinkClick = async (req: Request, res: Response) => {
-  //console.log('req.body', req.body);
   try {
     // Create a new object to store the click information
     const clickData: ClickData = {
@@ -197,7 +188,6 @@ const sLinkClick = async (req: Request, res: Response) => {
     // ------------ Local file system ------------
     // // Read the data from the data.json file and parse it
     // let jsonData = JSON.parse(fs.readFileSync(`${__dirname}/../../assets/data.json`));
-    // //console.log('jsonData', jsonData);
     // ------------
 
     // ------------ Yandex Object Storage ------------
@@ -209,7 +199,6 @@ const sLinkClick = async (req: Request, res: Response) => {
 
     // Check if this user id already exists to add the click information to it
     if (jsonData.hasOwnProperty(clickData.id)) {
-      //console.log('User exists, add click information');
 
       // Check if the click information already exists and add it in array with click objects or create a new array with the click object
       if (jsonData[clickData.id].click) {
@@ -242,7 +231,6 @@ const sLinkClick = async (req: Request, res: Response) => {
 
     // Stringify the updated data
     let updatedData = JSON.stringify(jsonData, null, 2);
-    //console.log('updatedData', updatedData);
 
     // ------------ Local file system ------------
     // // Write the updated data back to the file
